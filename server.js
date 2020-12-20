@@ -15,7 +15,9 @@ const books = require('./api/books');
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+// Initialize Passport and use config file
 app.use(passport.initialize());
+require('./config/passport')(passport);
 
 // Home route
 app.get('/', (req, res) => {
