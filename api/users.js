@@ -17,7 +17,8 @@ router.get('/test', (req, res) => {
 
 // POST api/users/register (Public)
 router.post('/register', (req, res) => {
-    console.log('inside of register')
+    console.log(`/register route for >>> ${req.body.email}`);
+    console.log('inside of register');
     console.log(req.body);
 
     console.log(db);
@@ -53,7 +54,8 @@ router.post('/register', (req, res) => {
 })
 
 // POST api/users/login (Public)
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
+    console.log(`/login route for >>> ${req.body}`);
     const email = req.body.email;
     const password = req.body.password;
 
@@ -73,17 +75,35 @@ router.post('/login', (req, res) => {
                     console.log(isMatch);
                     // User match, send a JSON Web Token
                     // Create a token payload
+                    // user.expiredToken = Date.now();
+                    // await user.save();
                     const payload = {
                         id: user.id,
                         email: user.email,
-                        name: user.name
+                        name: user.name,
+                        // expiredToken: user.expiredToken
                     };
                     // Sign token
                     // 3600000 is one hour
-                    jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' }, (error, token) => {
+                    jwt.sign(payload, JWT_SECRET, { expiresIn: 60 }, (error, token) => {
+                        if (error) {
+                            res.status(400).json({ msg: 'Session has ended, please log in again.'});
+                        }
+                        const verifyOptions = {
+                            expiresIn:  60,
+                        };
+
+                        const  legit = jwt.verify(token, JWT_SECRET, verifyOptions);
+                        console.log(legit);
+                        console.log({
+                            success: true,
+                            token: `Bearer ${token}`,
+                            userData: legit
+                        })
                         res.json({
                             success: true,
-                            token: `Bearer ${token}`
+                            token: `Bearer ${token}`,
+                            userData: legit
                         });
                     });
                 } else {
@@ -96,6 +116,9 @@ router.post('/login', (req, res) => {
 
 // GET api/users/current (Private)
 router.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
+    console.log('//////////////// INSIDE OF PROFILE ROUTE ////////////////');
+    conosole.log(req)
+    console.log(res.body);
     res.json({
         id: req.user.id,
         name: req.user.name,
