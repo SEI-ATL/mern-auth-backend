@@ -84,8 +84,8 @@ router.post('/login', async (req, res) => {
                         // expiredToken: user.expiredToken
                     };
                     // Sign token
-                    // 3600000 is one hour
-                    jwt.sign(payload, JWT_SECRET, { expiresIn: 60 }, (error, token) => {
+                    // 3600 is one hour
+                    jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (error, token) => {
                         if (error) {
                             res.status(400).json({ msg: 'Session has ended, please log in again.'});
                         }
